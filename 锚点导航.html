@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>锚点导航</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .content{
+      margin: 20px;
+    }
+    .content li{
+      text-indent: 40px;
+    }
+    .menu{
+      display: flex;
+      position: fixed;
+      top: 0;
+      background: #fff;
+      cursor: pointer;
+    }
+    .menu li{
+      padding: 8px;
+      font-size: 14px;
+    }
+    .active{
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <ul class="menu">
+    <li v-for="val in list" :class="currentKey == val.key ? 'active' : ''"
+    @click="changeKey(val.key)">{{val.name}}</li>
+  </ul>
+  <div style="height: 20px"></div>
+  <div v-for="(val, index) in list" class="content" :ref="val.key">
+    <p>{{val.name}}</p>
+    <ul>
+      <li v-for="item in 30">内容：{{index + 1}}</li>
+    </ul>
+  </div>
+</div>
+<script src="../js/vue.js"></script>
+<script>
+  let vm = new Vue({
+    el: '#app',
+    data(){
+      return {
+        list: [
+          {
+            name: '内容1',
+            key: 'ref1'
+          },{
+            name: '内容2',
+            key: 'ref2'
+          },{
+            name: '内容3',
+            key: 'ref3'
+          },{
+            name: '内容4',
+            key: 'ref4'
+          },{
+            name: '内容5',
+            key: 'ref5'
+          },{
+            name: '内容6',
+            key: 'ref6'
+          },{
+            name: '内容7',
+            key: 'ref7'
+          }
+        ],
+        currentKey: 'ref1',
+        itemOffsetTop: [],
+        firstOffsetTop: 0
+      }
+    },
+    mounted() {
+      this.$nextTick(() => {
+        this.firstOffsetTop = this.$refs[this.currentKey][0].offsetTop;
+        document.addEventListener('scroll', this.onScroll);
+        this.list.forEach((val) => {
+          this.itemOffsetTop.push({
+            key: val.key,
+            num: this.$refs[val.key][0].offsetTop - this.firstOffsetTop,
+            height: this.$refs[val.key][0].clientHeight
+          });
+        });
+      });
+    },
+    methods:{
+      onScroll(){
+        const scrollTop = document.documentElement.scrollTop;
+        this.itemOffsetTop.forEach((val, index) => {
+          if(scrollTop > val.num && scrollTop - val.num > val.height / 2){
+            if(index == this.itemOffsetTop.length - 1){
+              this.currentKey = this.itemOffsetTop[index].key;
+            }else {
+              this.currentKey = this.itemOffsetTop[index + 1].key;
+            }
+          }else if(scrollTop < this.itemOffsetTop[0].height / 2){
+            this.currentKey = this.itemOffsetTop[0].key;
+          }
+        })
+      },
+      //点击锚点定位
+      changeKey(key){
+        document.removeEventListener('scroll', this.throttledScrollHandler);
+        this.currentKey = key;
+        let to = this.$refs[key][0].offsetTop - this.firstOffsetTop;
+        this.animationScrollTo(document.documentElement, to);
+      },
+      //锚点定位动画滚动
+      animationScrollTo(el, to) {
+        let scrollY = 0;
+        const beginY = el.scrollTop;
+        const raf = window.requestAnimationFrame || (func => setTimeout(func, 10));
+        const moveFn = () => {
+          if (beginY - to < 0) {
+            scrollY += (to - beginY) / 30;
+            if(scrollY <= (to - beginY)){
+              el.scrollTop = beginY + scrollY;
+              raf(moveFn);
+            }else {
+              el.scrollTop = to;
+              document.addEventListener('scroll', this.throttledScrollHandler);
+            }
+          }else if(beginY - to > 0){
+            scrollY += (beginY - to) / 30;
+            if(scrollY <= (beginY - to)){
+              el.scrollTop = beginY - scrollY;
+              raf(moveFn);
+            }else {
+              el.scrollTop = to;
+              document.addEventListener('scroll', this.throttledScrollHandler);
+            }
+          }
+        };
+        raf(moveFn);
+      }
+    }
+  })
+</script>
+</body>
+</html>
