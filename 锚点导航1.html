@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>锚点导航</title>
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .content{
+      margin: 20px;
+    }
+    .content li{
+      text-indent: 40px;
+    }
+    .menu{
+      display: flex;
+      position: fixed;
+      top: 0;
+      background: #fff;
+      cursor: pointer;
+    }
+    .menu li{
+      padding: 8px;
+      font-size: 14px;
+    }
+    .active{
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <ul class="menu">
+    <li v-for="(val,index) in list" :class="currentKey == val.key ? 'active' : ''"
+        @click="changeKey(index)">{{val.name}}</li>
+  </ul>
+  <div style="height: 20px"></div>
+  <div v-for="(val, index) in list" class="content" :ref="val.key">
+    <p>{{val.name}}</p>
+    <ul>
+      <li v-for="item in 30">内容：{{index + 1}}</li>
+    </ul>
+  </div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.min.js"></script>
+<script>
+  //文章用的方法比较复杂，这边用了更简便的方法
+  // 但是兼容性不一定更好，如果出现兼容问题用另外一个demo
+  let vm = new Vue({
+    el: '#app',
+    data(){
+      return {
+        list: [
+          {
+            name: '内容1',
+            key: 'ref1'
+          },{
+            name: '内容2',
+            key: 'ref2'
+          },{
+            name: '内容3',
+            key: 'ref3'
+          },{
+            name: '内容4',
+            key: 'ref4'
+          },{
+            name: '内容5',
+            key: 'ref5'
+          },{
+            name: '内容6',
+            key: 'ref6'
+          },{
+            name: '内容7',
+            key: 'ref7'
+          }
+        ],
+        currentKey: 'ref1',
+        itemOffsetTop: [],
+        firstOffsetTop: 0
+      }
+    },
+    mounted() {
+      this.$nextTick(() => {
+        this.firstOffsetTop = this.$refs[this.currentKey][0].offsetTop;
+        document.addEventListener('scroll', this.onScroll);
+        this.list.forEach((val) => {
+          this.itemOffsetTop.push({
+            key: val.key,
+            num: this.$refs[val.key][0].offsetTop - this.firstOffsetTop,
+          });
+        });
+      });
+    },
+    methods:{
+      onScroll(){
+        const scrollTop = document.documentElement.scrollTop;
+        this.itemOffsetTop.forEach((item, index) => {
+          if (scrollTop + 200 >= item.num) {
+            this.currentKey = item.key
+          }
+        })
+      },
+      //点击锚点定位
+      changeKey(index){
+        this.currentKey = this.itemOffsetTop[index].key;
+        let to = this.itemOffsetTop[index].num;
+        document.documentElement.scrollTo({
+          top: to,
+          behavior: 'smooth'
+        })
+      },
+    }
+  })
+</script>
+</body>
+</html>
