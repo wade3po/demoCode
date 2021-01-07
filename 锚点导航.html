@@ -112,7 +112,7 @@
       },
       //点击锚点定位
       changeKey(key){
-        document.removeEventListener('scroll', this.throttledScrollHandler);
+        document.removeEventListener('scroll', this.onScroll);
         this.currentKey = key;
         let to = this.$refs[key][0].offsetTop - this.firstOffsetTop;
         this.animationScrollTo(document.documentElement, to);
@@ -130,7 +130,7 @@
               raf(moveFn);
             }else {
               el.scrollTop = to;
-              document.addEventListener('scroll', this.throttledScrollHandler);
+              document.addEventListener('scroll', this.onScroll);
             }
           }else if(beginY - to > 0){
             scrollY += (beginY - to) / 30;
@@ -139,7 +139,7 @@
               raf(moveFn);
             }else {
               el.scrollTop = to;
-              document.addEventListener('scroll', this.throttledScrollHandler);
+              document.addEventListener('scroll', this.onScroll);
             }
           }
         };
