@@ -1,0 +1,14 @@
+button{
+  animation: throttle 2s step-end forwards;
+}
+button:active{
+  animation: none;
+}
+@keyframes throttle {
+  from {
+    pointer-events: none;
+  }
+  to {
+    pointer-events: all;
+  }
+}
