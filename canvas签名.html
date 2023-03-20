@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <div>
+        <button onclick="cancel()">取消</button>
+        <button onclick="save()">保存</button>
+    </div>
+</body>
+<script>
+    const canvas = document.querySelector('canvas');
+    canvas.width = 500;
+    canvas.height = 300;
+    canvas.style.border = '1px solid #000';
+    const ctx = canvas.getContext('2d');
+
+    ctx.lineWidth = 3;//线宽
+    ctx.strokeStyle = 'red';//线颜色
+    ctx.lineCap = 'round';//线条的结束端点样式
+    ctx.lineJoin = 'round';//两条线相交时，所创建的拐角类型
+
+    const mobileStatus = (/Mobile|Android|iPhone/i.test(navigator.userAgent));
+
+    const start = event => {
+      const { offsetX, offsetY, pageX, pageY } = mobileStatus ? event.changedTouches[0] : event;
+      ctx.beginPath();//起始一条路径，或重置当前路径
+      ctx.moveTo(pageX, pageY);//把路径移动到画布中的指定点，不创建线条
+      window.addEventListener(mobileStatus ? "touchmove" : "mousemove", draw);
+    }
+
+    const draw = event => {
+      const { pageX, pageY } = mobileStatus ? event.changedTouches[0] : event;
+      ctx.lineTo(pageX , pageY );//添加一个新点，然后在画布中创建从该点到最后指定点的线条
+      ctx.stroke();//绘制已定义的路径
+    }
+    const cloaseDraw = () => {
+      window.removeEventListener("mousemove", draw);
+    }
+
+    window.addEventListener(mobileStatus ? "touchstart" : "mousedown", start);
+    window.addEventListener(mobileStatus ? "touchend" :"mouseup", cloaseDraw);
+    
+    const cancel = () => {
+      ctx.clearRect(0, 0,500, 300);//在给定的矩形内清除指定的像素
+    }
+
+    const save = () => {
+      canvas.toBlob(blob => {
+          const date = Date.now().toString();
+          const a = document.createElement('a');
+          a.download = `${date}.png`;
+          a.href = URL.createObjectURL(blob);
+          a.click();
+          a.remove();
+      })
+    }
+</script>
+</html>
