@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>webrtc拍照</title>
   <style>
     *{
       margin: 0;
@@ -24,19 +24,16 @@
   var track = null;
 
   function takePhoto () {
-    navigator.getMedia = navigator.getUserMedia;
-    if (navigator.getMedia) {
-      navigator.getMedia({
-        video: true
-      },function (stream) {
-          var video = document.getElementById('cameraVideo');
-          video.srcObject = stream
-          mediaStream = stream;
-          track = stream.getTracks()[0];
-      },function (err) {
-        console.log(err);
+    navigator.getUserMedia({
+      video: true
+    },function (stream) {
+        var video = document.getElementById('cameraVideo');
+        video.srcObject = stream
+        mediaStream = stream;
+        track = stream.getTracks()[0];
+    },function (err) {
+      console.log(err);
     });
-    }
   }
 
   function snapPhoto () {
@@ -51,7 +48,8 @@
         type: "image/png",
         lastModified: Date.now()
       });
-    })
+      download(Date.now().toString() + '.png', file);
+    });
   }
 
   function closePhoto () {
@@ -59,15 +57,25 @@
       if (mediaStream.stop) {
           mediaStream.stop();
       }
-      var video = document.getElementById('cameraVideo');
-      video.src = "";
-    }
+    };
     if (track !== null) {
         if (track.stop) {
             track.stop();
         }
-    }
+    };
+    
+    var video = document.getElementById('cameraVideo');
+    video.src = "";
   }
+
+  const download = (fileName, blob) => {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(link.href);
+  };
 </script>
 </body>
 </html>
